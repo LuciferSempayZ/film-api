@@ -30,26 +30,65 @@ class MovieController extends Controller
     /**
      * Создать новый фильм
      */
-    public function store(MovieRequest $request) {
-        $data = $request->validated();
+    public function store(Request $request)
+    {
+        try {
+            // Валидация запроса
+            $validated = $request->validate([
+                'title' => 'required|string|max:255',
+                'release_year' => 'required|regex:/^\d{4}$/',
+                'duration' => 'required|integer',
+                'description' => 'required|string',
+                'photo' => 'required|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
+                'studio_id' => 'required|exists:studios,id',
+                'age_rating_id' => 'required|exists:age_rating,id',
+            ]);
 
-        // Загрузка изображения, если предоставлено
-        if ($request->hasFile('photo')) {
-            $data['photo'] = $request->file('photo')->store('movies', 'public');
+            // Логирование всех данных запроса
+            \Log::info('Request data:', $request->all());
+
+            // Проверка, загружен ли файл
+            if ($request->hasFile('photo')) {
+                // Сохранение фото в storage/public/movies_photos
+                $photoPath = $request->file('photo')->store('movies_photos', 'public');
+                \Log::info('Photo uploaded successfully', ['path' => $photoPath]);
+            } else {
+                // Возвращаем ошибку, если фото не загружено
+                return response()->json(['message' => 'No photo uploaded'], 422);
+            }
+
+            // Логирование данных, прошедших валидацию
+            \Log::info('Validated Data:', $validated);
+
+            // Создание нового фильма в базе данных
+            $movie = Movie::create([
+                'title' => $validated['title'],
+                'release_year' => $validated['release_year'],
+                'duration' => $validated['duration'],
+                'description' => $validated['description'],
+                'photo' => $photoPath,
+                'studio_id' => $validated['studio_id'],
+                'age_rating_id' => $validated['age_rating_id'],
+            ]);
+
+            // Проверка, что фильм был создан
+            if ($movie) {
+                \Log::info('Movie created successfully:', $movie->toArray());
+                return response()->json($movie, 201);  // Возвращаем фильм с кодом 201 (создано)
+            } else {
+                \Log::error('Failed to create movie');
+                return response()->json(['message' => 'Failed to create movie'], 500);  // Ошибка при создании фильма
+            }
+
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            // Обработка ошибок валидации
+            \Log::error('Validation failed', ['errors' => $e->errors()]);
+            return response()->json(['message' => 'Validation failed', 'errors' => $e->errors()], 422);  // Возвращаем ошибки валидации
+        } catch (\Exception $e) {
+            // Обработка всех других исключений
+            \Log::error('Unexpected error occurred', ['message' => $e->getMessage()]);
+            return response()->json(['message' => 'Unexpected error occurred', 'error' => $e->getMessage()], 500);  // Ошибка на сервере
         }
-
-        $movie = Movie::create($data);
-
-        // Связь с жанрами и актерами
-        if ($request->has('genres')) {
-            $movie->genres()->attach($request->input('genres'));
-        }
-
-        if ($request->has('actors')) {
-            $movie->actors()->attach($request->input('actors'));
-        }
-
-        return response()->json(['message' => 'Фильм успешно добавлен', 'movie' => $movie], 201);
     }
 
     /**

@@ -10,10 +10,10 @@ class Movie extends Model
     use HasFactory;
 
     protected $fillable = [
-        'title', 'release_year', 'duration', 'description', 'photo', 'studio_id', 'age_rating_id', 'rating',
+        'title', 'release_year', 'duration', 'description', 'photo', 'studio_id', 'age_rating_id',
     ];
 
-    public function genres()
+    public function Genre()
     {
         return $this->belongsToMany(Genre::class, 'movie_genres'); // Указываем промежуточную таблицу movie_genres
     }
@@ -28,7 +28,7 @@ class Movie extends Model
         return $this->belongsTo(Studio::class);
     }
 
-    public function ageRating()
+    public function AgeRating()
     {
         return $this->belongsTo(AgeRating::class, 'age_rating_id'); // Убедитесь, что поле называется age_rating_id
     }

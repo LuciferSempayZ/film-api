@@ -31,7 +31,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/movies/favorites', [MovieController::class, 'favorites']); // Просмотр избранного
     Route::get('/movies', [MovieController::class, 'index']);
     Route::get('/movies/{id}', [MovieController::class, 'show']);
-    Route::post('/movies', [MovieController::class, 'store']);
+    Route::post('/movies/create', [MovieController::class, 'store']);
     Route::put('/movies/{id}', [MovieController::class, 'update']);
     Route::delete('/movies/{id}', [MovieController::class, 'destroy']);
 
@@ -42,7 +42,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::put('/rating/{id}', [RatingController::class, 'update']);
     Route::delete('/rating/{id}', [RatingController::class, 'destroy']);
 
-    // Актеры
+    // Актерыs
     Route::apiResource('/actors', ActorController::class);
     Route::prefix('actors')->group(function () {
         Route::get('/actors', [ActorController::class, 'index']); // Публичный доступ

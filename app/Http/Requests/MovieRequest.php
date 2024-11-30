@@ -6,7 +6,8 @@ use Illuminate\Foundation\Http\FormRequest;
 
 class MovieRequest extends FormRequest
 {
-    public function rules() {
+    public function rules()
+    {
         return [
             'title' => 'required|string|max:255',
             'release_year' => 'required|integer|min:1888|max:' . date('Y'),
@@ -14,9 +15,7 @@ class MovieRequest extends FormRequest
             'description' => 'nullable|string',
             'photo' => 'nullable|image|max:2048',
             'studio_id' => 'required|exists:studios,id',
-            'age_rating_id' => 'required|exists:age_ratings,id',
-            'genres' => 'nullable|array',
-            'genres.*' => 'exists:genres,id',
+            'age_rating_id' => 'required|exists:age_rating,id',
             'actors' => 'nullable|array',
             'actors.*' => 'exists:actors,id',
         ];
@@ -40,8 +39,6 @@ class MovieRequest extends FormRequest
             'studio_id.exists' => 'Указанная студия не найдена.',
             'age_rating_id.required' => 'Возрастной рейтинг обязателен.',
             'age_rating_id.exists' => 'Указанный возрастной рейтинг не найден.',
-            'genres.array' => 'Жанры должны быть массивом.',
-            'genres.*.exists' => 'Указанный жанр не найден.',
             'actors.array' => 'Актеры должны быть массивом.',
             'actors.*.exists' => 'Указанный актер не найден.',
         ];

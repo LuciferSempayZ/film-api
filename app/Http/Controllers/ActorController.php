@@ -30,7 +30,15 @@ class ActorController extends Controller
     // Добавление нового актера
     public function store(ActorRequest $request)
     {
-        $actor = Actor::create($request->validated());  // Валидация с помощью ActorRequest
+        $data = $request->validated();
+
+        // Проверяем наличие файла изображения
+        if ($request->hasFile('photo')) {
+            $data['photo'] = $request->file('photo')->store('actors/photos', 'public');
+        }
+
+        $actor = Actor::create($data);
+
         return response()->json(['message' => 'Актер успешно добавлен.', 'actor' => $actor], 201);
     }
 
@@ -43,7 +51,21 @@ class ActorController extends Controller
             return response()->json(['message' => 'Актер не найден.'], 404);
         }
 
-        $actor->update($request->validated());
+        $data = $request->validated();
+
+        // Проверяем наличие нового файла изображения
+        if ($request->hasFile('photo')) {
+            // Удаляем старый файл, если он существует
+            if ($actor->photo) {
+                \Storage::disk('public')->delete($actor->photo);
+            }
+
+            // Сохраняем новое изображение
+            $data['photo'] = $request->file('photo')->store('actors/photos', 'public');
+        }
+
+        $actor->update($data);
+
         return response()->json(['message' => 'Актер успешно обновлен.', 'actor' => $actor]);
     }
 
@@ -56,7 +78,13 @@ class ActorController extends Controller
             return response()->json(['message' => 'Актер не найден.'], 404);
         }
 
+        // Удаляем файл изображения, если он существует
+        if ($actor->photo) {
+            \Storage::disk('public')->delete($actor->photo);
+        }
+
         $actor->delete();
+
         return response()->json(['message' => 'Актер успешно удален.']);
     }
 }
