@@ -9,6 +9,8 @@ class AgeRating extends Model
 {
     use HasFactory;
 
+    protected $table = 'age_rating'; // Указываем название таблицы
+
     protected $fillable = [
         'age',
     ];

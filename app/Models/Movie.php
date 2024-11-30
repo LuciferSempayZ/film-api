@@ -10,17 +10,17 @@ class Movie extends Model
     use HasFactory;
 
     protected $fillable = [
-        'title', 'release_year', 'duration', 'description', 'photo', 'studio_id', 'age_rating_id',
+        'title', 'release_year', 'duration', 'description', 'photo', 'studio_id', 'age_rating_id', 'rating',
     ];
 
     public function genres()
     {
-        return $this->belongsToMany(Genre::class);
+        return $this->belongsToMany(Genre::class, 'movie_genres'); // Указываем промежуточную таблицу movie_genres
     }
 
     public function actors()
     {
-        return $this->belongsToMany(Actor::class);
+        return $this->belongsToMany(Actor::class, 'movie_actors', 'movie_id', 'actor_id');
     }
 
     public function studio()
@@ -30,11 +30,11 @@ class Movie extends Model
 
     public function ageRating()
     {
-        return $this->belongsTo(AgeRating::class);
+        return $this->belongsTo(AgeRating::class, 'age_rating_id'); // Убедитесь, что поле называется age_rating_id
     }
 
-    public function ratings()
+    public function rating()
     {
-        return $this->hasMany(Rating::class);
+        return $this->hasMany(Rating::class, 'movies_id'); // Указываем правильное имя внешнего ключа
     }
 }

@@ -9,13 +9,15 @@ class Rating extends Model
 {
     use HasFactory;
 
+    protected $table = 'rating';  // Указываем правильное имя таблицы
+
     protected $fillable = [
-        'movie_id', 'rating', 'review_text', 'user_id',
+        'movies_id', 'rating', 'review_text', 'users_id',
     ];
 
     public function movie()
     {
-        return $this->belongsTo(Movie::class);
+        return $this->belongsTo(Movie::class, 'movies_id'); // Указываем правильное имя внешнего ключа
     }
 
     public function user()
